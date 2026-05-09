@@ -1,4 +1,1 @@
-export const environment = {
-  production: false,
-  apiUrl: 'http://localhost/backend/api',
-};
+export const environment = {};

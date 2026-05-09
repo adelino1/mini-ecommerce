@@ -1,7 +1,18 @@
 <?php
-function jsonResponse($data, $statusCode = 200) {
-    header('Content-Type: application/json');
+function sendSuccess($data, $statusCode = 200) {
     http_response_code($statusCode);
-    echo json_encode($data);
-    exit;
+    echo json_encode([
+        "success" => true,
+        "data"    => $data
+    ]);
+    exit();
+}
+
+function sendError($message, $statusCode = 400) {
+    http_response_code($statusCode);
+    echo json_encode([
+        "success" => false,
+        "message" => $message
+    ]);
+    exit();
 }
