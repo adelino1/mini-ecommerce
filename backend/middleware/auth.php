@@ -1,15 +1,42 @@
 <?php
-// Validação de token simples
+require_once __DIR__ . '/../helpers/jwt.php';
+require_once __DIR__ . '/../helpers/response.php';
 
-$headers = getallheaders();
-$authHeader = isset($headers['Authorization']) ? $headers['Authorization'] : null;
+function getAuthToken() {
+    $headers = getallheaders();
 
-if (!$authHeader || !preg_match('/Bearer\s+(\S+)/', $authHeader, $matches)) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
+    foreach ($headers as $key => $value) {
+        if (strtolower($key) === 'authorization') {
+            if (str_starts_with($value, 'Bearer ')) {
+                return substr($value, 7);
+            }
+        }
+    }
+    return null;
 }
 
-$token = $matches[1];
+function requireAuth() {
+    $token = getAuthToken();
 
-// TODO: validar JWT
+    if (!$token) {
+        sendError('Não autorizado', 401);
+    }
+
+    $payload = validateToken($token);
+
+    if (!$payload) {
+        sendError('Token inválido ou expirado', 401);
+    }
+
+    return $payload;
+}
+
+function requireAdmin() {
+    $payload = requireAuth();
+
+    if ($payload['role'] !== 'admin') {
+        sendError('Acesso negado', 403);
+    }
+
+    return $payload;
+}
