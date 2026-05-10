@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
+  selector: 'app-order-confirmation',
   standalone: true,
   template: `<h1>Pedido Confirmado!</h1>`
 })
