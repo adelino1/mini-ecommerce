@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-register',
@@ -10,24 +11,24 @@ import { AuthService } from '../../../../core/services/auth.service';
   template: `
     <div class="auth-container">
       <div class="auth-box">
-        <h2>Criar conta</h2>
+        <h2>{{ i18n.t('nav.register') }}</h2>
 
         @if (error()) {
           <div class="error-msg">{{ error() }}</div>
         }
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <label>Nome</label>
+          <label>{{ i18n.t('auth.name') }}</label>
           <input type="text" formControlName="name" placeholder="o seu nome"/>
 
-          <label>Email</label>
+          <label>{{ i18n.t('auth.email') }}</label>
           <input type="email" formControlName="email" placeholder="o seu email"/>
 
-          <label>Password</label>
+          <label>{{ i18n.t('auth.password') }}</label>
           <input type="password" formControlName="password" placeholder="mínimo 6 caracteres"/>
 
           <button type="submit" [disabled]="loading()">
-            {{ loading() ? 'A registar...' : 'Criar conta' }}
+            {{ loading() ? 'A registar...' : i18n.t('nav.register') }}
           </button>
         </form>
 
@@ -90,12 +91,15 @@ export class RegisterComponent {
   form: FormGroup;
   loading = signal(false);
   error   = signal('');
+  i18n: I18nService;
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    i18n: I18nService
   ) {
+    this.i18n = i18n;
     this.form = this.fb.group({
       name:     ['', Validators.required],
       email:    ['', [Validators.required, Validators.email]],

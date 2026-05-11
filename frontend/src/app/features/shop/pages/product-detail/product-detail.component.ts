@@ -2,6 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ProductService } from '../../../../core/services/product.service';
+import { CartService } from '../../../../core/services/cart.service';
 import { Product } from '../../../../core/models/interfaces';
 
 @Component({
@@ -73,7 +74,6 @@ import { Product } from '../../../../core/models/interfaces';
       font-size: 0.95rem;
     }
     .back-link:hover { text-decoration: underline; }
-
     .product-detail {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -83,7 +83,6 @@ import { Product } from '../../../../core/models/interfaces';
       padding: 2rem;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-
     .product-image {
       background: #f8f8f8;
       border-radius: 8px;
@@ -93,11 +92,7 @@ import { Product } from '../../../../core/models/interfaces';
       min-height: 300px;
       overflow: hidden;
     }
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .product-image img { width: 100%; height: 100%; object-fit: cover; }
     .image-placeholder {
       width: 120px;
       height: 120px;
@@ -110,7 +105,6 @@ import { Product } from '../../../../core/models/interfaces';
       font-size: 3rem;
       font-weight: bold;
     }
-
     .product-info { display: flex; flex-direction: column; gap: 1rem; }
     .category-tag {
       font-size: 0.8rem;
@@ -123,7 +117,6 @@ import { Product } from '../../../../core/models/interfaces';
     .stock { color: #28a745; font-size: 0.95rem; margin: 0; }
     .stock.low { color: #e74c3c; }
     .description { color: #666; line-height: 1.6; }
-
     .btn-cart {
       padding: 1rem 2rem;
       background: #28a745;
@@ -137,7 +130,6 @@ import { Product } from '../../../../core/models/interfaces';
     }
     .btn-cart:hover:not(:disabled) { background: #1e7e34; }
     .btn-cart:disabled { background: #ccc; cursor: not-allowed; }
-
     .success-msg {
       background: #d4edda;
       color: #155724;
@@ -145,11 +137,9 @@ import { Product } from '../../../../core/models/interfaces';
       border-radius: 4px;
       font-size: 0.95rem;
     }
-
-    .loading, .error {
-      text-align: center;
-      padding: 3rem;
-      color: #888;
+    .loading, .error { text-align: center; padding: 3rem; color: #888; }
+    @media (max-width: 900px) {
+      .product-detail { grid-template-columns: 1fr; gap: 1.2rem; padding: 1rem; }
     }
   `]
 })
@@ -162,6 +152,7 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private productService: ProductService,
+    private cartService: CartService,
     private router: Router
   ) {}
 
@@ -180,10 +171,15 @@ export class ProductDetailComponent implements OnInit {
 
   addToCart() {
     this.adding.set(true);
-    setTimeout(() => {
-      this.adding.set(false);
-      this.added.set(true);
-      setTimeout(() => this.added.set(false), 2000);
-    }, 500);
+    this.cartService.addItem(this.product()!.id, 1).subscribe({
+      next: () => {
+        this.adding.set(false);
+        this.added.set(true);
+        setTimeout(() => this.added.set(false), 2000);
+      },
+      error: () => {
+        this.adding.set(false);
+      }
+    });
   }
 }

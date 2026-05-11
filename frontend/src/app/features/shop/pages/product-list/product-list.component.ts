@@ -230,6 +230,13 @@ import { Product, Category } from '../../../../core/models/interfaces';
       color: #888;
       font-size: 1.1rem;
     }
+
+    @media (max-width: 900px) {
+      .shop-container { flex-direction: column; }
+      .sidebar { width: 100%; }
+      .products-header { flex-direction: column; align-items: stretch; gap: 0.8rem; }
+      .search-input { width: 100%; }
+    }
   `]
 })
 export class ProductListComponent implements OnInit {

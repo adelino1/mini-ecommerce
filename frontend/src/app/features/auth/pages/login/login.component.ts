@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 
 @Component({
   selector: 'app-login',
@@ -10,25 +11,26 @@ import { AuthService } from '../../../../core/services/auth.service';
   template: `
     <div class="auth-container">
       <div class="auth-box">
-        <h2>Entrar na conta</h2>
+        <h2>{{ i18n.t('nav.login') }}</h2>
 
         @if (error()) {
           <div class="error-msg">{{ error() }}</div>
         }
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <label>Email</label>
+          <label>{{ i18n.t('auth.email') }}</label>
           <input type="email" formControlName="email" placeholder="o seu email"/>
 
-          <label>Password</label>
+          <label>{{ i18n.t('auth.password') }}</label>
           <input type="password" formControlName="password" placeholder="a sua password"/>
 
           <button type="submit" [disabled]="loading()">
-            {{ loading() ? 'A entrar...' : 'Entrar' }}
+            {{ loading() ? 'A entrar...' : i18n.t('nav.login') }}
           </button>
         </form>
 
         <p>Não tem conta? <a routerLink="/register">Registar</a></p>
+        <p><a routerLink="/forgot-password">{{ i18n.t('auth.forgot') }}</a></p>
       </div>
     </div>
   `,
@@ -87,12 +89,15 @@ export class LoginComponent {
   form: FormGroup;
   loading = signal(false);
   error   = signal('');
+  i18n: I18nService;
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    i18n: I18nService
   ) {
+    this.i18n = i18n;
     this.form = this.fb.group({
       email:    ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]

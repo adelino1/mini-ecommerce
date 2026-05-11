@@ -55,9 +55,7 @@ function getProducts($pdo) {
         LIMIT ? OFFSET ?
     ");
 
-    $params[] = $limit;
-    $params[] = $offset;
-    $stmt->execute($params);
+    $stmt->execute(array_merge($params, [$limit, $offset]));
 
     sendSuccess([
         'products' => $stmt->fetchAll(),

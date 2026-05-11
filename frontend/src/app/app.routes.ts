@@ -21,6 +21,18 @@ export const routes: Routes = [
         .then(m => m.RegisterComponent)
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/pages/forgot-password/forgot-password.component')
+        .then(m => m.ForgotPasswordComponent)
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/pages/reset-password/reset-password.component')
+        .then(m => m.ResetPasswordComponent)
+  },
+  {
     path: 'shop',
     loadComponent: () =>
       import('./features/shop/pages/product-list/product-list.component')
@@ -60,6 +72,7 @@ export const routes: Routes = [
       import('./features/orders/pages/order-confirmation/order-confirmation.component')
         .then(m => m.OrderConfirmationComponent)
   },
+
   {
     path: 'orders/:id',
     canActivate: [authGuard],

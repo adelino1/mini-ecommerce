@@ -1,1 +1,30 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --text: #1b1f23;
+  --muted: #5c6773;
+  --border: #d7dde3;
+}
+
+:root[data-theme='dark'] {
+  --bg: #121826;
+  --surface: #1d2433;
+  --text: #f4f7ff;
+  --muted: #aeb7c5;
+  --border: #2d3648;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+}

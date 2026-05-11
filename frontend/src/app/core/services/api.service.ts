@@ -28,9 +28,11 @@ export class ApiService {
     );
   }
 
-  delete<T>(endpoint: string): Observable<ApiResponse<T>> {
-    return this.http.delete<ApiResponse<T>>(
-      `${this.baseUrl}/${endpoint}`
-    );
-  }
+  delete<T>(endpoint: string, body?: any): Observable<ApiResponse<T>> {
+  return this.http.request<ApiResponse<T>>(
+    'DELETE',
+    `${this.baseUrl}/${endpoint}`,
+    { body }
+  );
+}
 }

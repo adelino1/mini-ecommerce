@@ -50,6 +50,14 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.api.post<any>('auth/forgot-password.php', { email });
+  }
+
+  resetPassword(email: string, token: string, password: string): Observable<any> {
+    return this.api.post<any>('auth/reset-password.php', { email, token, password });
+  }
+
   loadCurrentUser(): Observable<any> {
     return this.api.get<User>('auth/me.php').pipe(
       tap(res => this._user.set(res.data))
