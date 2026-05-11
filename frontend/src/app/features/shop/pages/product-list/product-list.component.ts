@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ProductService } from '../../../../core/services/product.service';
 import { CategoryService } from '../../../../core/services/category.service';
+import { CurrencyService } from '../../../../core/services/currency.service';
 import { Product, Category } from '../../../../core/models/interfaces';
 
 @Component({
@@ -71,7 +72,11 @@ import { Product, Category } from '../../../../core/models/interfaces';
                 <div class="product-info">
                   <span class="category-tag">{{ product.category_name }}</span>
                   <h4>{{ product.name }}</h4>
-                  <p class="price">{{ product.price | number:'1.2-2' }} €</p>
+                  @if (currencyService.rate() > 0) {
+                    <p class="price">{{ toAoa(product.price) | number:'1.0-0' }} Kz</p>
+                  } @else {
+                    <p class="price-loading">A carregar preço em Kz...</p>
+                  }
                   <p class="stock" [class.low]="product.stock < 5">
                     {{ product.stock > 0 ? 'Em stock (' + product.stock + ')' : 'Esgotado' }}
                   </p>
@@ -204,6 +209,7 @@ import { Product, Category } from '../../../../core/models/interfaces';
       color: #e74c3c;
       margin: 0.3rem 0;
     }
+    .price-loading { font-size: 0.85rem; color: #666; margin: 0 0 0.3rem; }
     .stock {
       font-size: 0.8rem;
       color: #28a745;
@@ -249,8 +255,11 @@ export class ProductListComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private categoryService: CategoryService
-  ) {}
+    private categoryService: CategoryService,
+    public currencyService: CurrencyService
+  ) {
+    this.currencyService.ensureRateLoaded();
+  }
 
   ngOnInit() {
     this.loadCategories();
@@ -280,6 +289,10 @@ export class ProductListComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  toAoa(valueEur: number): number {
+    return this.currencyService.toAoa(valueEur);
   }
 
   filterByCategory(id: number | null) {

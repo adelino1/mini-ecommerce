@@ -28,6 +28,9 @@ import { I18nService } from '../../../../core/services/i18n.service';
             {{ loading() ? 'A entrar...' : i18n.t('nav.login') }}
           </button>
         </form>
+        <button type="button" class="btn-admin" (click)="loginAsAdmin()" [disabled]="loading()">
+          Entrar rápido como Admin (teste)
+        </button>
 
         <p>Não tem conta? <a routerLink="/register">Registar</a></p>
         <p><a routerLink="/forgot-password">{{ i18n.t('auth.forgot') }}</a></p>
@@ -73,6 +76,8 @@ import { I18nService } from '../../../../core/services/i18n.service';
     }
     button:disabled { background: #ccc; cursor: not-allowed; }
     button:hover:not(:disabled) { background: #0056b3; }
+    .btn-admin { background: #6f42c1; margin-top: 0.4rem; }
+    .btn-admin:hover:not(:disabled) { background: #5a32a3; }
     .error-msg {
       background: #ffe0e0;
       color: #c00;
@@ -115,6 +120,18 @@ export class LoginComponent {
       next: () => this.router.navigate(['/shop']),
       error: err => {
         this.error.set(err.error?.message || 'Erro ao fazer login');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  loginAsAdmin() {
+    this.loading.set(true);
+    this.error.set('');
+    this.auth.quickAdminLogin().subscribe({
+      next: () => this.router.navigate(['/admin']),
+      error: err => {
+        this.error.set(err.error?.message || 'Erro ao entrar como admin');
         this.loading.set(false);
       }
     });

@@ -11,8 +11,16 @@ export class OrderService {
     return this.api.get<Order[]>('orders/index.php');
   }
 
+  getAll(): Observable<ApiResponse<Order[]>> {
+    return this.api.get<Order[]>('orders/index.php');
+  }
+
   getOrder(id: number): Observable<ApiResponse<Order>> {
     return this.api.get<Order>(`orders/show.php?id=${id}`);
+  }
+
+  updateStatus(id: number, status: string): Observable<ApiResponse<any>> {
+    return this.api.put<any>(`orders/index.php?id=${id}`, { status });
   }
 
   createOrder(payload: {

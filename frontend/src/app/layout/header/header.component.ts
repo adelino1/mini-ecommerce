@@ -28,6 +28,9 @@ import { I18nService } from '../../core/services/i18n.service';
 
             @if (auth.isAdmin()) {
               <a routerLink="/admin" routerLinkActive="active">{{ i18n.t('nav.admin') }}</a>
+              <a routerLink="/admin/products" routerLinkActive="active">Produtos</a>
+              <a routerLink="/admin/categories" routerLinkActive="active">Categorias</a>
+              <a routerLink="/admin/orders" routerLinkActive="active">Pedidos Admin</a>
             }
 
             <span class="user-name">{{ i18n.t('nav.hello') }}, {{ auth.currentUser()?.name }}</span>

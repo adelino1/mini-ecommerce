@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
@@ -14,10 +14,8 @@ import { AuthService } from '../../../../core/services/auth.service';
         @if (error()) { <div class="error-msg">{{ error() }}</div> }
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
-          <label>Email</label>
-          <input type="email" formControlName="email" />
           <label>Token</label>
-          <input type="text" formControlName="token" />
+          <input type="text" formControlName="token" placeholder="Cole o token de recuperação" />
           <label>Nova password</label>
           <input type="password" formControlName="password" />
           <button type="submit" [disabled]="loading()">
@@ -44,12 +42,18 @@ export class ResetPasswordComponent {
   message = signal('');
   error = signal('');
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.form = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
       token: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
+    const token = this.route.snapshot.queryParamMap.get('token');
+    if (token) this.form.patchValue({ token });
   }
 
   onSubmit() {
@@ -57,8 +61,8 @@ export class ResetPasswordComponent {
     this.loading.set(true);
     this.message.set('');
     this.error.set('');
-    const { email, token, password } = this.form.value;
-    this.auth.resetPassword(email, token, password).subscribe({
+    const { token, password } = this.form.value;
+    this.auth.resetPassword(token, password).subscribe({
       next: () => {
         this.message.set('Password redefinida com sucesso. Vai ser redirecionado.');
         this.loading.set(false);

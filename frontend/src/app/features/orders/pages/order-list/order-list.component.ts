@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Order } from '../../../../core/models/interfaces';
 import { OrderService } from '../../../../core/services/order.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CurrencyService } from '../../../../core/services/currency.service';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -38,7 +39,13 @@ import { environment } from '../../../../../environments/environment';
               <tr>
                 <td>#{{ order.id }}</td>
                 @if (auth.isAdmin()) { <td>{{ order.user_name || '-' }}</td> }
-                <td>{{ order.total | number:'1.2-2' }} €</td>
+                <td>
+                  @if (currency.rate() > 0) {
+                    <strong>{{ toAoa(order.total) | number:'1.0-0' }} Kz</strong>
+                  } @else {
+                    A carregar valor...
+                  }
+                </td>
                 <td>{{ order.status }}</td>
                 <td>{{ order.created_at | date:'short' }}</td>
                 <td><a [routerLink]="['/orders', order.id]">Ver</a></td>
@@ -60,11 +67,13 @@ import { environment } from '../../../../../environments/environment';
 export class OrderListComponent {
   private orderService = inject(OrderService);
   auth = inject(AuthService);
+  currency = inject(CurrencyService);
   orders = signal<Order[]>([]);
   loading = signal(true);
   exportUrl = `${environment.apiUrl}/orders/export.php`;
 
   constructor() {
+    this.currency.ensureRateLoaded();
     this.orderService.listOrders().subscribe({
       next: res => {
         this.orders.set(res.data);
@@ -74,6 +83,10 @@ export class OrderListComponent {
         this.loading.set(false);
       }
     });
+  }
+
+  toAoa(valueEur: number): number {
+    return this.currency.toAoa(valueEur);
   }
 
   exportCsv() {

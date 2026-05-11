@@ -14,6 +14,14 @@ switch ($method) {
         requireAdmin();
         createCategory($pdo);
         break;
+    case 'PUT':
+        requireAdmin();
+        updateCategory($pdo);
+        break;
+    case 'DELETE':
+        requireAdmin();
+        deleteCategory($pdo);
+        break;
     default:
         sendError('Método não permitido', 405);
 }
@@ -58,4 +66,53 @@ function createCategory($pdo) {
         'name' => $name,
         'slug' => $slug
     ], 201);
+}
+
+function updateCategory($pdo) {
+    $id = (int) ($_GET['id'] ?? 0);
+    if (!$id) {
+        sendError('ID inválido');
+    }
+
+    $input = json_decode(file_get_contents('php://input'), true);
+    $name = trim($input['name'] ?? '');
+    $slug = trim($input['slug'] ?? '');
+
+    if (!$name || !$slug) {
+        sendError('Nome e slug são obrigatórios');
+    }
+
+    $exists = $pdo->prepare('SELECT id FROM categories WHERE id = ?');
+    $exists->execute([$id]);
+    if (!$exists->fetch()) {
+        sendError('Categoria não encontrada', 404);
+    }
+
+    $dup = $pdo->prepare('SELECT id FROM categories WHERE slug = ? AND id <> ?');
+    $dup->execute([$slug, $id]);
+    if ($dup->fetch()) {
+        sendError('Este slug já existe', 409);
+    }
+
+    $stmt = $pdo->prepare('UPDATE categories SET name = ?, slug = ? WHERE id = ?');
+    $stmt->execute([$name, $slug, $id]);
+
+    sendSuccess(['message' => 'Categoria atualizada']);
+}
+
+function deleteCategory($pdo) {
+    $id = (int) ($_GET['id'] ?? 0);
+    if (!$id) {
+        sendError('ID inválido');
+    }
+
+    $exists = $pdo->prepare('SELECT id FROM categories WHERE id = ?');
+    $exists->execute([$id]);
+    if (!$exists->fetch()) {
+        sendError('Categoria não encontrada', 404);
+    }
+
+    $pdo->prepare('UPDATE products SET category_id = NULL WHERE category_id = ?')->execute([$id]);
+    $pdo->prepare('DELETE FROM categories WHERE id = ?')->execute([$id]);
+    sendSuccess(['message' => 'Categoria removida']);
 }

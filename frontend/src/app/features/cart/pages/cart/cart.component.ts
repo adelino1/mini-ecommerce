@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { CartService } from '../../../../core/services/cart.service';
+import { CurrencyService } from '../../../../core/services/currency.service';
 
 @Component({
   selector: 'app-cart',
@@ -30,10 +31,18 @@ import { CartService } from '../../../../core/services/cart.service';
                 </div>
                 <div class="item-info">
                   <h4>{{ item.name }}</h4>
-                  <p class="unit-price">{{ item.price | number:'1.2-2' }} € / unidade</p>
+                  @if (currency.rate() > 0) {
+                    <p class="unit-price">{{ toAoa(item.price) | number:'1.0-0' }} Kz / unidade</p>
+                  } @else {
+                    <p class="unit-price-loading">A carregar preço em Kz...</p>
+                  }
                 </div>
                 <div class="item-qty">Qtd: {{ item.quantity }}</div>
-                <div class="item-subtotal">{{ item.subtotal | number:'1.2-2' }} €</div>
+                @if (currency.rate() > 0) {
+                  <div class="item-subtotal">{{ toAoa(item.subtotal) | number:'1.0-0' }} Kz</div>
+                } @else {
+                  <div class="item-subtotal-loading">A carregar subtotal em Kz...</div>
+                }
                 <button class="btn-remove" (click)="removeItem(item.product_id)">
                   ✕
                 </button>
@@ -45,11 +54,19 @@ import { CartService } from '../../../../core/services/cart.service';
             <h3>Resumo</h3>
             <div class="summary-row">
               <span>Itens ({{ cart.count() }})</span>
-              <span>{{ cart.total() | number:'1.2-2' }} €</span>
+              @if (currency.rate() > 0) {
+                <span>{{ toAoa(cart.total()) | number:'1.0-0' }} Kz</span>
+              } @else {
+                <span>...</span>
+              }
             </div>
             <div class="summary-total">
               <span>Total</span>
-              <span>{{ cart.total() | number:'1.2-2' }} €</span>
+              @if (currency.rate() > 0) {
+                <span>{{ toAoa(cart.total()) | number:'1.0-0' }} Kz</span>
+              } @else {
+                <span>...</span>
+              }
             </div>
             <a routerLink="/checkout" class="btn-checkout">
               Finalizar Compra
@@ -123,9 +140,11 @@ import { CartService } from '../../../../core/services/cart.service';
     }
     .item-info { flex: 1; }
     .item-info h4 { margin: 0 0 0.2rem; color: #333; font-size: 0.95rem; }
-    .unit-price { margin: 0; color: #888; font-size: 0.85rem; }
+    .unit-price { margin: 0; color: #0d6efd; font-size: 0.9rem; font-weight: 700; }
+    .unit-price-loading { margin: 0.1rem 0 0; color: #888; font-size: 0.8rem; }
     .item-qty { color: #555; font-size: 0.9rem; white-space: nowrap; }
     .item-subtotal { font-weight: bold; color: #e74c3c; white-space: nowrap; }
+    .item-subtotal-loading { color: #888; white-space: nowrap; font-size: 0.8rem; }
     .btn-remove {
       background: none;
       border: 1px solid #ddd;
@@ -198,12 +217,19 @@ import { CartService } from '../../../../core/services/cart.service';
 })
 export class CartComponent implements OnInit {
   cart = inject(CartService);
+  currency = inject(CurrencyService);
 
   ngOnInit() {
+    this.currency.ensureRateLoaded();
     this.cart.loadCart().subscribe();
   }
 
   removeItem(productId: number) {
     this.cart.removeItem(productId).subscribe();
   }
+
+  toAoa(valueEur: number): number {
+    return this.currency.toAoa(valueEur);
+  }
+
 }

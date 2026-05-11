@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ProductService } from '../../../../core/services/product.service';
 import { CartService } from '../../../../core/services/cart.service';
+import { CurrencyService } from '../../../../core/services/currency.service';
 import { Product } from '../../../../core/models/interfaces';
 
 @Component({
@@ -33,7 +34,11 @@ import { Product } from '../../../../core/models/interfaces';
           <div class="product-info">
             <span class="category-tag">{{ product()!.category_name }}</span>
             <h1>{{ product()!.name }}</h1>
-            <p class="price">{{ product()!.price | number:'1.2-2' }} €</p>
+            @if (currencyService.rate() > 0) {
+              <p class="price">{{ toAoa(product()!.price) | number:'1.0-0' }} Kz</p>
+            } @else {
+              <p class="price-loading">A carregar preço em Kz...</p>
+            }
 
             <p class="stock" [class.low]="product()!.stock < 5">
               @if (product()!.stock > 0) {
@@ -114,6 +119,7 @@ import { Product } from '../../../../core/models/interfaces';
     }
     h1 { margin: 0; color: #333; font-size: 1.8rem; }
     .price { font-size: 2rem; font-weight: bold; color: #e74c3c; margin: 0; }
+    .price-loading { margin: -0.7rem 0 0; color: #666; font-size: 0.9rem; }
     .stock { color: #28a745; font-size: 0.95rem; margin: 0; }
     .stock.low { color: #e74c3c; }
     .description { color: #666; line-height: 1.6; }
@@ -153,8 +159,11 @@ export class ProductDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private productService: ProductService,
     private cartService: CartService,
-    private router: Router
-  ) {}
+    private router: Router,
+    public currencyService: CurrencyService
+  ) {
+    this.currencyService.ensureRateLoaded();
+  }
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -182,4 +191,9 @@ export class ProductDetailComponent implements OnInit {
       }
     });
   }
+
+  toAoa(valueEur: number): number {
+    return this.currencyService.toAoa(valueEur);
+  }
+
 }

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CartService } from '../../../../core/services/cart.service';
 import { OrderService } from '../../../../core/services/order.service';
 import { DecimalPipe } from '@angular/common';
+import { CurrencyService } from '../../../../core/services/currency.service';
 
 @Component({
   standalone: true,
@@ -11,7 +12,11 @@ import { DecimalPipe } from '@angular/common';
   template: `
     <div class="checkout">
       <h1>Checkout</h1>
-      <p>Total: {{ cart.total() | number:'1.2-2' }} €</p>
+      @if (currency.rate() > 0) {
+        <p>Total: {{ toAoa(cart.total()) | number:'1.0-0' }} Kz</p>
+      } @else {
+        <p>Total: A carregar valor em Kz...</p>
+      }
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <input placeholder="Nome" formControlName="shipping_name" />
@@ -38,6 +43,7 @@ import { DecimalPipe } from '@angular/common';
 })
 export class CheckoutComponent {
   cart = inject(CartService);
+  currency = inject(CurrencyService);
   private fb = inject(FormBuilder);
   private orderService = inject(OrderService);
   private router = inject(Router);
@@ -55,6 +61,7 @@ export class CheckoutComponent {
   });
 
   constructor() {
+    this.currency.ensureRateLoaded();
     this.cart.loadCart().subscribe();
   }
 
@@ -73,5 +80,9 @@ export class CheckoutComponent {
         this.loading.set(false);
       }
     });
+  }
+
+  toAoa(valueEur: number): number {
+    return this.currency.toAoa(valueEur);
   }
 }

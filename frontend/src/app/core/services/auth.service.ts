@@ -41,6 +41,15 @@ export class AuthService {
     );
   }
 
+  quickAdminLogin(): Observable<any> {
+    return this.api.post<any>('auth/quick-admin-login.php', {}).pipe(
+      tap(res => {
+        localStorage.setItem('auth_token', res.data.token);
+        this._user.set(res.data.user);
+      })
+    );
+  }
+
   register(name: string, email: string, password: string): Observable<any> {
     return this.api.post<any>('auth/register.php', { name, email, password }).pipe(
       tap(res => {
@@ -54,8 +63,8 @@ export class AuthService {
     return this.api.post<any>('auth/forgot-password.php', { email });
   }
 
-  resetPassword(email: string, token: string, password: string): Observable<any> {
-    return this.api.post<any>('auth/reset-password.php', { email, token, password });
+  resetPassword(token: string, password: string, email?: string): Observable<any> {
+    return this.api.post<any>('auth/reset-password.php', { token, password, email });
   }
 
   loadCurrentUser(): Observable<any> {

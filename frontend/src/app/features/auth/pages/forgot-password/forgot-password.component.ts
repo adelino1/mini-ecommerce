@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
@@ -46,7 +46,7 @@ export class ForgotPasswordComponent {
   message = signal('');
   error = signal('');
 
-  constructor(private fb: FormBuilder, private auth: AuthService) {
+  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
@@ -59,8 +59,15 @@ export class ForgotPasswordComponent {
     this.error.set('');
     this.auth.forgotPassword(this.form.value.email).subscribe({
       next: res => {
-        const token = res.data?.reset_token ? ` Token: ${res.data.reset_token}` : '';
-        this.message.set(`${res.data?.message ?? 'Pedido processado.'}${token}`);
+        const token = res.data?.reset_token || '';
+        this.message.set(
+          token
+            ? `Token gerado com sucesso. Copie e avance para redefinir a password.`
+            : (res.data?.message ?? 'Pedido processado.')
+        );
+        if (token) {
+          setTimeout(() => this.router.navigate(['/reset-password'], { queryParams: { token } }), 400);
+        }
         this.loading.set(false);
       },
       error: err => {

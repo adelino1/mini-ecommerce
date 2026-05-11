@@ -78,3 +78,42 @@ CREATE TABLE IF NOT EXISTS password_resets (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_password_resets_email (email)
 );
+
+-- ------------------------------------------------------------------
+-- Migração defensiva para bases já existentes (evita bugs em runtime)
+-- ------------------------------------------------------------------
+ALTER TABLE categories
+  ADD COLUMN IF NOT EXISTS slug VARCHAR(120) NOT NULL;
+
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS stock INT NOT NULL DEFAULT 0;
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS image_url VARCHAR(255) NULL;
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS active TINYINT(1) NOT NULL DEFAULT 1;
+
+ALTER TABLE cart_items
+  ADD COLUMN IF NOT EXISTS user_id INT NULL;
+ALTER TABLE cart_items
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_name VARCHAR(120) NOT NULL DEFAULT 'Cliente';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_email VARCHAR(150) NOT NULL DEFAULT 'cliente@example.com';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_phone VARCHAR(40) NOT NULL DEFAULT '-';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_address VARCHAR(255) NOT NULL DEFAULT 'Sem morada';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_city VARCHAR(120) NOT NULL DEFAULT 'N/D';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS shipping_postal_code VARCHAR(40) NOT NULL DEFAULT 'N/D';
+ALTER TABLE orders
+  ADD COLUMN IF NOT EXISTS notes TEXT NULL;
+
+ALTER TABLE order_items
+  ADD COLUMN IF NOT EXISTS unit_price DECIMAL(10,2) NOT NULL DEFAULT 0;
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS role VARCHAR(20) NOT NULL DEFAULT 'customer';

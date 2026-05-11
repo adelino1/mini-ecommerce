@@ -55,7 +55,13 @@ function getProducts($pdo) {
         LIMIT ? OFFSET ?
     ");
 
-    $stmt->execute(array_merge($params, [$limit, $offset]));
+    $bindIndex = 1;
+    foreach ($params as $param) {
+        $stmt->bindValue($bindIndex++, $param);
+    }
+    $stmt->bindValue($bindIndex++, $limit, PDO::PARAM_INT);
+    $stmt->bindValue($bindIndex++, $offset, PDO::PARAM_INT);
+    $stmt->execute();
 
     sendSuccess([
         'products' => $stmt->fetchAll(),
